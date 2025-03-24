@@ -20,7 +20,8 @@ tauri-build = { version = "2", features = [] }
 [dependencies]
 directories = "6.0.0"
 tokio = { version = "1", features = ["full"] }
-sqlx = { version = "0.8", features = [ "runtime-tokio" ] }
+sqlx = { version = "=0.8.1", features = ["sqlite"] }
+rusqlite = "=0.32.1"
 tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
