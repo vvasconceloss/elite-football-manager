@@ -11,6 +11,8 @@ pub fn run() {
     let database_pool = runtime_tokio.block_on(database::connection::init_database(&save_name))
     .expect("Failed to initialize database");
 
+    runtime_tokio.block_on(database::migration::execute_migrations(&database_pool));
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(database_pool)
