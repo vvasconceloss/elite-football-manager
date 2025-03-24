@@ -1,11 +1,12 @@
 use directories::BaseDirs;
 use std::{fs::{self, File}, io, path::PathBuf};
+use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
 fn fetch_config_path() -> Option<PathBuf> {
     BaseDirs::new().map(|base_dirs| base_dirs.config_dir().to_path_buf())
 }
 
-fn create_database_files(config_path: PathBuf) -> std::io::Result<PathBuf> {
+fn config_database_files(config_path: PathBuf) -> std::io::Result<PathBuf> {
     let user_config_path = config_path.to_str().ok_or_else(||
         io::Error::new(
             io::ErrorKind::InvalidData, 
@@ -23,14 +24,21 @@ fn create_database_files(config_path: PathBuf) -> std::io::Result<PathBuf> {
     Ok(database_path)
 }
 
-pub async fn connect_database() -> Result<PathBuf, String> {
+async fn create_database() -> Result<PathBuf, String> {
     match fetch_config_path() {
         Some(config_path) => {
-            match create_database_files(config_path.clone()) {
+            match config_database_files(config_path.clone()) {
                 Ok(database_path) => Ok(database_path),
                 Err(e) => Err(format!("Failed to create the file: {}", e))
             }
         }
         None => Err("Configuration directory not found".to_string())
     }
+}
+
+pub async fn init_database() -> Result<SqlitePool, String> {
+    let database_path = create_database().await?;
+    let connection_string = format!("sqlite:{}", database_path.display());
+
+    SqlitePoolOptions::new().connect(&connection_string).await.map_err(|e| format!("Failed to connect to database: {}", e))
 }
