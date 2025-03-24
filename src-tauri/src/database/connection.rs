@@ -1,9 +1,9 @@
-use directories::BaseDirs;
+use directories::UserDirs;
 use std::{fs::{self, File}, io, path::PathBuf};
 use sqlx::{sqlite::SqlitePoolOptions, SqlitePool};
 
 fn fetch_config_path() -> Option<PathBuf> {
-    BaseDirs::new().map(|base_dirs| base_dirs.config_dir().to_path_buf())
+    UserDirs::new().map(|base_dirs| base_dirs.document_dir().unwrap().to_path_buf())
 }
 
 fn config_database_files(config_path: PathBuf, save_name: &str) -> std::io::Result<PathBuf> {
@@ -15,8 +15,9 @@ fn config_database_files(config_path: PathBuf, save_name: &str) -> std::io::Resu
     )?;
 
     let database_path = PathBuf::from(user_config_path)
-    .join("EFM2025")
-    .join("saves")
+    .join("ProPlay Games")
+    .join("Elite Football Manager 2025")
+    .join("games")
     .join(format!("{}.efm", save_name));
 
     fs::create_dir_all(database_path.parent().unwrap())?;
